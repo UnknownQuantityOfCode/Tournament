@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width">
+		<title>Demonstration</title>
+
+		<script type="text/javascript" src="Tournament.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+
+		<style type="text/css">
+			.winner {color: white; background: #0023FB;}
+		</style>
+	</head>
+	<body>
+		<div id="page">
+			<h1>Tournament</h1>
+			<div v-if="tournament.type">
+				<div v-for="(stage, index) in tournament.get_stages()">
+					<h2 v-text="stage"></h2>
+					<ul v-for="game in tournament.get_games(stage)" :data-game="game.id">
+						<li v-for="(team, index) in game.teams">
+							<span v-text="team.name" :data-team="team.id" :data-team-name="team.name" :class="(game.winner && team.id == game.winner.id) ? 'winner' : ''" v-on:click="tournament.set_winner(game, team); refresh()"></span>
+						</li>
+					</ul>
+					<button v-on:click="new_stage(stage)" v-if="index == tournament.get_stages().length-1">New Stage</button>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			var page = new Vue({
+			  el: '#page',
+			  data: {
+			    tournament: {}
+			  },
+			  beforeMount: function(){
+			  	var vp = this;
+			  },
+			  mounted: function(){
+			  	var vp = this;
+			  	vp.tournament = new Tournament('single');
+				vp.tournament.add_team('Wildcats');
+				vp.tournament.add_team({name: 'Dodgers', colour:'Green'});
+				vp.tournament.add_game('Week 1', 'Wildcats', 'Dodgers');
+				vp.tournament.add_game('Week 1', 'Storm', 'Spartans');
+				vp.tournament.set_winner(vp.tournament.find_game(1), vp.tournament.find_team('Spartans'));
+			  },
+			  methods: {
+			    refresh: function(){
+			    	this.$forceUpdate();
+			    },
+			    new_stage: function(stage){
+			    	var vp = this;
+			    	var new_stage_name = prompt("New stage name?");
+			    	if(new_stage_name){
+			    		vp.tournament.create_stage(stage, new_stage_name);
+			    	}
+			    	vp.refresh();
+			    }
+			  }
+			});
+		</script>
+	</body>
+</html>
